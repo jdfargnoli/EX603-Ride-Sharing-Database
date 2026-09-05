@@ -8,3 +8,12 @@
 6. What I would do differently — an honest paragraph. Critiquing your own work is a senior signal, not a weakness.
 7. Video presentation — embed or link the video.
 8. How to run it — the commands to create the schema and execute a query. Assume the reader has a database and nothing else.
+
+The five roles
+Role        What it is                                                                     Always has
+actor       The user who acts on the platform.                                             A primary key and a display name. 
+producer    The supply-side entity being acted upon.                                       A primary key, a display name, an activity flag, and a numeric                                                                                             attribute used for filtering. 
+event       The high-volume fact table recording each action.                              Foreign keys to actor and producer, a timestamp, and a numeric                                                                                             metric you will aggregate. 
+catalog     A descriptive dimension: the tags or categories that classify producers.       A primary key and a name. 
+junction    The many-to-many link between producer and catalog.                            A composite primary key over foreign keys to producer and                                                                                                  catalog. 
+
