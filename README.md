@@ -38,10 +38,21 @@ One RATINGS table for both directions. rater_id/ratee_id handles rider→driver 
 Each decision traces to a requirement: pooling → junction, precision → mirrored preferences, quality improvement → auditable scores. That requirements-to-schema traceability is usually what graders look for.
 
 4. Query catalogue — per unit, a short table listing the queries and the business question each answers, linked to the .sql files.
-5. Technical highlights — three to five things a reader should notice.
-6. What I would do differently — an honest paragraph. Critiquing your own work is a senior signal, not a weakness.
-7. Video presentation — embed or link the video.
-8. How to run it — the commands to create the schema and execute a query. Assume the reader has a database and nothing else.
+I will use the following structure
+00 query catalogue
+01 schema
+02 seed data
+03 actors producers
+04 matching
+05 trips operations
+06 metrics analytics 
+<img width="961" height="1075" alt="image" src="https://github.com/user-attachments/assets/1ab98606-a1a8-492d-b7d1-112cadfdfecb" />
+
+
+6. Technical highlights — three to five things a reader should notice.
+7. What I would do differently — an honest paragraph. Critiquing your own work is a senior signal, not a weakness.
+8. Video presentation — embed or link the video.
+9. How to run it — the commands to create the schema and execute a query. Assume the reader has a database and nothing else.
 
 #### The five roles
 #### Role    |    What it is                                  |                                   Always has
