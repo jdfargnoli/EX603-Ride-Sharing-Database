@@ -49,7 +49,7 @@ I will use the following structure
 <img width="961" height="1075" alt="image" src="https://github.com/user-attachments/assets/1ab98606-a1a8-492d-b7d1-112cadfdfecb" />
 
 
-## 6. Technical highlights — three to five things a reader should notice.
+## 5. Technical highlights — three to five things a reader should notice.
 1. Every query answers a business question, not a syntax exercise. The second column isn't "demonstrates a JOIN" — it's "which drivers cancel most often?" That framing shows the database exists to serve the ride-sharing business, and it's the discipline real data teams use: no query ships without a question it answers.
 
 2. The units map to the course's role framework. Unit 3 = actors/producers, Unit 4 = the matching requirement, Unit 5 = the event, Unit 6 = metrics. A reader can trace your original theme table (riders, drivers, trips, badges, junction, fare_amount) straight through the ERD into runnable SQL — end-to-end traceability from requirements to implementation.
@@ -60,9 +60,9 @@ I will use the following structure
 
 5. The seed data is engineered to prove the design. Unit 2 deliberately includes pooled trips, a vehicle shared between two drivers, and a canceled trip — one fixture for each structural claim the schema makes. Every downstream query returns rows because the test data was built to exercise the edge cases, not just the happy path.
    
-## 8. What I would do differently — an honest paragraph. Critiquing your own work is a senior signal, not a weakness.
-## 9. Video presentation — embed or link the video.
-## 10. How to run it — the commands to create the schema and execute a query. Assume the reader has a database and nothing else.
+## 6. What I would do differently — an honest paragraph. Critiquing your own work is a senior signal, not a weakness.
+## 7. Video presentation — embed or link the video.
+## 8. How to run it — the commands to create the schema and execute a query. Assume the reader has a database and nothing else.
 
 #### The five roles
 #### Role    |    What it is                                  |                                   Always has
