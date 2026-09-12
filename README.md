@@ -11,7 +11,7 @@ The third cluster concerns lifecycle, integrity, and measurement. What states do
 
 Answering these three question clusters gives exactly whats needed to move from requirements to an ER diagram, and then mechanically into DDL.
 
-##3. Schema — embed the ERD image; summarize the five roles and your key design decisions.
+## 3. Schema — embed the ERD image; summarize the five roles and your key design decisions.
 
 The core transaction is a TRIP. A trip is fulfilled by exactly one DRIVER using exactly one VEHICLE (the two FK arrows coming in from the left), and it carries one or more RIDERS through the TRIP_RIDERS junction table — that junction is what makes pooled rides possible, and it splits the cost via fare_share. The trip row itself holds the lifecycle data (status, timestamps, locations), the fare_amount metric, and the match_score your algorithm assigned.
 
