@@ -63,6 +63,35 @@ I will use the following structure
 ## 6. What I would do differently — an honest paragraph. Critiquing your own work is a senior signal, not a weakness.
 ## 7. Video presentation — embed or link the video.
 ## 8. How to run it — the commands to create the schema and execute a query. Assume the reader has a database and nothing else.
+Here's the minimal run guide, assuming only a working PostgreSQL install and the six .sql files in a folder.
+Option A — command line (psql)
+Step 1: Open a terminal in the folder holding the files. On Windows, use the SQL Shell (psql) from the Start menu, or open PowerShell and cd to the folder. 
+Step 2: Create a database for the project to get a clean namespace instead of dumping tables into the default postgres database:
+bash
+psql -U postgres -c "CREATE DATABASE rideshare;"
+Step 3: Build the schema, then load the data — order matters:
+bash
+psql -U postgres -d rideshare -f 01_schema.sql
+psql -U postgres -d rideshare -f 02_seed_data.sql
+The -d rideshare targets the new database; -f executes a file. You'll see a stream of CREATE TABLE and INSERT 0 4 confirmations. If step 3 throws "relation already exists," you've run it twice — drop and recreate the database (DROP DATABASE rideshare; then repeat from step 2).
+Step 4: Run a query. Either execute a whole unit file the same way:
+bash
+psql -U postgres -d rideshare -f 04_matching.sql
+...or open an interactive session and paste one query:
+bash
+psql -U postgres -d rideshare
+Then at the rideshare=# prompt, paste the statement under any -- Q#.# header (include the ending semicolon — psql won't execute without it) and the results print as a table. Type \q to exit.
+
+Option B — pgAdmin
+Right-click Databases → Create → Database, name it rideshare
+Right-click the new rideshare database → Query Tool
+Open 01_schema.sql via the folder icon in the Query Tool toolbar, press F5 — then do the same for 02_seed_data.sql
+For any catalogue query: open the unit file, highlight just that query with your mouse, press F5 — pgAdmin executes only the selected text, which is exactly how you run one query out of a multi-query file
+Quick sanity check
+After steps 1–3, this should return 10:
+sql
+SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public';
+And Q5.1 (live trips board) should return exactly one row — the in-progress trip from the seed data. If both check out, everything downstream will run.
 
 #### The five roles
 #### Role    |    What it is                                  |                                   Always has
