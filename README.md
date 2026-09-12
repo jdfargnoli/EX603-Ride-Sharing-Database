@@ -1,8 +1,24 @@
 # EX603-Ride-Sharing-Database
 
-1. Project title and one-line summary — what system you modelled, in a sentence.
-2. The domain — your theme and the questions the platform must answer. Two to three paragraphs.
+1. ROUTAI is a new ride sharing service that give users and drivers a greater ability to find the type of riders/drivers that they will match up best with to improve the experience of all parties and make ride sharing much more enjoyable and safe by creating a deeper and well-matched relationship between all parties.
+
+## 2. The domain — your theme and the questions the platform must answer. Two to three paragraphs.
+Designing this database will start with requirements-elicitation questions organized around the entities in the given table: actors (riders), producers (drivers), and events (trips). The first cluster of questions concerns what I need to know about each party and why. What attributes of a driver matter for matching quality — vehicle type and capacity, languages spoken, accessibility accommodations, home service area, schedule availability, driving-style preferences (music, conversation, temperature)? Symmetrically, what rider attributes and preferences should be captured — accessibility needs, preferred vehicle class, tolerance for pooled rides, rating history? For each attribute, I will ask whether it is static (stored once on the profile), slowly changing (needs effective-dating, like a vehicle change), or per-trip (belongs on the trip record, not the profile). This distinction drives normalization decisions later, and it's the entity-vs-attribute analysis at the heart of conceptual design.
+
+The second cluster concerns relationships, cardinality, and the matching process itself. Can a driver operate multiple vehicles, and can a vehicle be shared between drivers? Is a trip always one rider to one driver, or do pooled rides make trips many-to-many with riders? What exactly does "precise matching" mean operationally — is it a scoring function over preference compatibility, and if so, which preference pairs must the schema make queryable (e.g., rider wants quiet ride ↔ driver's conversation preference)? What history does the matching algorithm needs: do past ratings, cancellations, and completed-trip counts feed the match, and should the schema store the match score and the candidate drivers considered so the algorithm's decisions are auditable and improvable?
+
+The third cluster concerns lifecycle, integrity, and measurement. What states does a trip pass through (requested → matched → accepted → in-progress → completed/canceled), and what timestamps and geolocations must be captured at each transition to compute metrics like fare_amount, wait time, and match quality? What business rules become constraints — a driver can't be on two active trips, a rating must be 1–5 and only from a participant of a completed trip? Finally, I should ask about privacy and retention up front: preference and location data is sensitive, so which fields need restricted access, and how long is trip-level location history kept? 
+
+Answering these three question clusters gives exactly whats needed to move from requirements to an ER diagram, and then mechanically into DDL.
+
 3. Schema — embed the ERD image; summarize the five roles and your key design decisions.
+
+<img width="1239" height="1129" alt="image" src="https://github.com/user-attachments/assets/c69dfbc0-b724-4956-96fe-55d053b52d57" />
+
+
+
+
+
 4. Query catalogue — per unit, a short table listing the queries and the business question each answers, linked to the .sql files.
 5. Technical highlights — three to five things a reader should notice.
 6. What I would do differently — an honest paragraph. Critiquing your own work is a senior signal, not a weakness.
