@@ -50,9 +50,19 @@ I will use the following structure
 
 
 6. Technical highlights — three to five things a reader should notice.
-7. What I would do differently — an honest paragraph. Critiquing your own work is a senior signal, not a weakness.
-8. Video presentation — embed or link the video.
-9. How to run it — the commands to create the schema and execute a query. Assume the reader has a database and nothing else.
+1. Every query answers a business question, not a syntax exercise. The second column isn't "demonstrates a JOIN" — it's "which drivers cancel most often?" That framing shows the database exists to serve the ride-sharing business, and it's the discipline real data teams use: no query ships without a question it answers.
+
+2. The units map to the course's role framework. Unit 3 = actors/producers, Unit 4 = the matching requirement, Unit 5 = the event, Unit 6 = metrics. A reader can trace your original theme table (riders, drivers, trips, badges, junction, fare_amount) straight through the ERD into runnable SQL — end-to-end traceability from requirements to implementation.
+
+3. Integrity is enforced in the schema, not the application. Q1.3's partial unique index makes "one active trip per driver" physically impossible to violate, and the CHECK constraints (ratings 1–5, completed_at ≥ requested_at) mean bad data can't get in even if the app misbehaves. Declarative enforcement in the database is the mark of a defensive design.
+
+4. The matching requirement — the project's stated differentiator — gets its own unit, and it closes the loop. Q4.1 ranks drivers by a weighted preference score, but Q4.4 is the subtle one: it audits whether stored match scores actually predicted good ratings. That makes the matcher measurable and improvable rather than a black box.
+
+5. The seed data is engineered to prove the design. Unit 2 deliberately includes pooled trips, a vehicle shared between two drivers, and a canceled trip — one fixture for each structural claim the schema makes. Every downstream query returns rows because the test data was built to exercise the edge cases, not just the happy path.
+   
+8. What I would do differently — an honest paragraph. Critiquing your own work is a senior signal, not a weakness.
+9. Video presentation — embed or link the video.
+10. How to run it — the commands to create the schema and execute a query. Assume the reader has a database and nothing else.
 
 #### The five roles
 #### Role    |    What it is                                  |                                   Always has
