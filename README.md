@@ -52,7 +52,7 @@ I will use the following structure
 ## 5. Technical highlights — three to five things a reader should notice.
 1. Every query answers a business question, not a syntax exercise. The second column isn't "demonstrates a JOIN" — it's "which drivers cancel most often?" That framing shows the database exists to serve the ride-sharing business, and it's the discipline real data teams use: no query ships without a question it answers.
 
-2. The units map to the course's role framework. Unit 3 = actors/producers, Unit 4 = the matching requirement, Unit 5 = the event, Unit 6 = metrics. A reader can trace your original theme table (riders, drivers, trips, badges, junction, fare_amount) straight through the ERD into runnable SQL — end-to-end traceability from requirements to implementation.
+2. The units map to the course's role framework. Unit 3 = actors/producers, Unit 4 = the matching requirement, Unit 5 = the event, Unit 6 = metrics. A reader can trace my original theme table (riders, drivers, trips, badges, junction, fare_amount) straight through the ERD into runnable SQL — end-to-end traceability from requirements to implementation.
 
 3. Integrity is enforced in the schema, not the application. Q1.3's partial unique index makes "one active trip per driver" physically impossible to violate, and the CHECK constraints (ratings 1–5, completed_at ≥ requested_at) mean bad data can't get in even if the app misbehaves. Declarative enforcement in the database is the mark of a defensive design.
 
