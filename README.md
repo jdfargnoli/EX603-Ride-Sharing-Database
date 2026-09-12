@@ -1,5 +1,5 @@
 # EX603-Ride-Sharing-Database
-
+ 
 ## 1. ROUTAI is a new ride sharing service that give users and drivers a greater ability to find the type of riders/drivers that they will match up best with to improve the experience of all parties and make ride sharing much more enjoyable and safe by creating a deeper and well-matched relationship between all parties.
 
 ## 2. The domain — your theme and the questions the platform must answer. Two to three paragraphs.
