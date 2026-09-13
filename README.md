@@ -1,7 +1,7 @@
 # EX603-Ride-Sharing-Database
-Name: JD Fargnoli
-Theme: Ride Sharing 
-What the System Does: A ride sharing service that intelligently connects riders with drivers for an enhanced quality experience.
+### Name: JD Fargnoli
+### Theme: Ride Sharing 
+### What the System Does: A ride sharing service that intelligently connects riders with drivers for an enhanced quality experience.
 
 ## 1. ROUTAI is a new ride sharing service that give users and drivers a greater ability to find the type of riders/drivers that they will match up best with to improve the experience of all parties and make ride sharing much more enjoyable and safe by creating a deeper and well-matched relationship between all parties.
 
