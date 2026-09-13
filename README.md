@@ -3,9 +3,9 @@
 ### Theme: Ride Sharing 
 ### What the System Does: A ride sharing service that intelligently connects riders with drivers for an enhanced quality experience.
 
-## 1. ROUTAI is a new ride sharing service that give users and drivers a greater ability to find the type of riders/drivers that they will match up best with to improve the experience of all parties and make ride sharing much more enjoyable and safe by creating a deeper and well-matched relationship between all parties.
+### 1. ROUTAI is a new ride sharing service that give users and drivers a greater ability to find the type of riders/drivers that they will match up best with to improve the experience of all parties and make ride sharing much more enjoyable and safe by creating a deeper and well-matched relationship between all parties.
 
-## 2. The domain — your theme and the questions the platform must answer. Two to three paragraphs.
+### 2. The domain — your theme and the questions the platform must answer. Two to three paragraphs.
 Designing this database will start with requirements-elicitation questions organized around the entities in the given table: actors (riders), producers (drivers), and events (trips). The first cluster of questions concerns what I need to know about each party and why. What attributes of a driver matter for matching quality — vehicle type and capacity, languages spoken, accessibility accommodations, home service area, schedule availability, driving-style preferences (music, conversation, temperature)? Symmetrically, what rider attributes and preferences should be captured — accessibility needs, preferred vehicle class, tolerance for pooled rides, rating history? For each attribute, I will ask whether it is static (stored once on the profile), slowly changing (needs effective-dating, like a vehicle change), or per-trip (belongs on the trip record, not the profile). This distinction drives normalization decisions later, and it's the entity-vs-attribute analysis at the heart of conceptual design.
 
 The second cluster concerns relationships, cardinality, and the matching process itself. Can a driver operate multiple vehicles, and can a vehicle be shared between drivers? Is a trip always one rider to one driver, or do pooled rides make trips many-to-many with riders? What exactly does "precise matching" mean operationally — is it a scoring function over preference compatibility, and if so, which preference pairs must the schema make queryable (e.g., rider wants quiet ride ↔ driver's conversation preference)? What history does the matching algorithm needs: do past ratings, cancellations, and completed-trip counts feed the match, and should the schema store the match score and the candidate drivers considered so the algorithm's decisions are auditable and improvable?
@@ -14,7 +14,7 @@ The third cluster concerns lifecycle, integrity, and measurement. What states do
 
 Answering these three question clusters gives exactly whats needed to move from requirements to an ER diagram, and then mechanically into DDL.
 
-## 3. Schema — embed the ERD image; summarize the five roles and your key design decisions.
+### 3. Schema — embed the ERD image; summarize the five roles and your key design decisions.
 
 The core transaction is a TRIP. A trip is fulfilled by exactly one DRIVER using exactly one VEHICLE (the two FK arrows coming in from the left), and it carries one or more RIDERS through the TRIP_RIDERS junction table — that junction is what makes pooled rides possible, and it splits the cost via fare_share. The trip row itself holds the lifecycle data (status, timestamps, locations), the fare_amount metric, and the match_score your algorithm assigned.
 
@@ -40,7 +40,7 @@ One RATINGS table for both directions. rater_id/ratee_id handles rider→driver 
 
 Each decision traces to a requirement: pooling → junction, precision → mirrored preferences, quality improvement → auditable scores. That requirements-to-schema traceability is usually what graders look for.
 
-## 4. Query catalogue — per unit, a short table listing the queries and the business question each answers, linked to the .sql files.
+### 4. Query catalogue — per unit, a short table listing the queries and the business question each answers, linked to the .sql files.
 I will use the following structure
 00 query catalogue
 01 schema
@@ -52,7 +52,7 @@ I will use the following structure
 <img width="961" height="1075" alt="image" src="https://github.com/user-attachments/assets/1ab98606-a1a8-492d-b7d1-112cadfdfecb" />
 
 
-## 5. Technical highlights — three to five things a reader should notice.
+### 5. Technical highlights — three to five things a reader should notice.
 1. Every query answers a business question, not a syntax exercise. The second column isn't "demonstrates a JOIN" — it's "which drivers cancel most often?" That framing shows the database exists to serve the ride-sharing business, and it's the discipline real data teams use: no query ships without a question it answers.
 
 2. The units map to the course's role framework. Unit 3 = actors/producers, Unit 4 = the matching requirement, Unit 5 = the event, Unit 6 = metrics. A reader can trace my original theme table (riders, drivers, trips, badges, junction, fare_amount) straight through the ERD into runnable SQL — end-to-end traceability from requirements to implementation.
@@ -63,9 +63,9 @@ I will use the following structure
 
 5. The seed data is engineered to prove the design. Unit 2 deliberately includes pooled trips, a vehicle shared between two drivers, and a canceled trip — one fixture for each structural claim the schema makes. Every downstream query returns rows because the test data was built to exercise the edge cases, not just the happy path.
    
-## 6. What I would do differently — an honest paragraph. Critiquing your own work is a senior signal, not a weakness.
-## 7. Video presentation — embed or link the video.
-## 8. How to run it — the commands to create the schema and execute a query. Assume the reader has a database and nothing else.
+### 6. What I would do differently — an honest paragraph. Critiquing your own work is a senior signal, not a weakness.
+### 7. Video presentation — embed or link the video.
+### 8. How to run it — the commands to create the schema and execute a query. Assume the reader has a database and nothing else.
 Here's the minimal run guide, assuming only a working PostgreSQL install and the six .sql files in a folder.
 Option A — command line (psql)
 Step 1: Open a terminal in the folder holding the files. On Windows, use the SQL Shell (psql) from the Start menu, or open PowerShell and cd to the folder. 
