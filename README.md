@@ -37,7 +37,7 @@ Pooled rides via junction, not a rider FK on trips. TRIP_RIDERS makes trip-to-ri
 Trips reference both driver AND specific vehicle. Since drivers can operate multiple vehicles (DRIVER_VEHICLES junction with effective_from history), the trip must record which one was actually used — capacity and accessibility matter for match quality.
 Match auditability. Storing match_score on each trip lets us correlate the algorithm's confidence against actual ratings afterward, so the matcher is improvable rather than a black box.
 One RATINGS table for both directions. rater_id/ratee_id handles rider→driver and driver→rider without duplicate structures; avg_rating on the profile tables is a deliberate denormalization — a cheap-to-read rollup updated per new rating.
-Each decision traces to a requirement: pooling → junction, precision → mirrored preferences, quality improvement → auditable scores. That requirements-to-schema traceability is usually what graders look for.
+Each decision traces to a requirement: pooling → junction, precision → mirrored preferences, quality improvement → auditable scores. 
 
 ### 4. Query catalogue — per unit, a short table listing the queries and the business question each answers, linked to the .sql files.
 I will use the following structure
