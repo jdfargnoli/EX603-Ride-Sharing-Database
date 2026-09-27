@@ -22,12 +22,21 @@
 -- =================================================================
 
 -- Hide "does not exist, skipping" notices on the first run.
+-- This setting hides messages below warning level, so the output stays clean.
 SET client_min_messages = warning;
 
 -- One transaction: the script either builds everything or nothing.
+-- This opens a transaction.Every statement from here until COMMIT; counts as one unit of work. 
+-- If any statement fails, PostgreSQL undoes all of them, so the database is never left half-built. 
+-- This works because PostgreSQL treats DROP and CREATE as transactional, which not every database does.
 BEGIN;
 
 -- Reset. Reverse creation order, so no dependency blocks a drop.
+-- DROP TABLE deletes a table and all its data.
+-- IF EXISTS means "only if it's there," so the first run doesn't fail on missing tables.
+-- CASCADE also removes anything that depends on the table, such as foreign keys pointing at it.
+-- The tables are listed in exact reverse creation order.
+-- This block is what makes the second run succeed: it clears everything away so the CREATE statements start from an empty database each time.
 DROP TABLE IF EXISTS ratings              CASCADE;
 DROP TABLE IF EXISTS trip_riders          CASCADE;
 DROP TABLE IF EXISTS trips                CASCADE;
@@ -44,22 +53,24 @@ DROP TABLE IF EXISTS riders               CASCADE;
 --    Recursive FK referred_by supports a rider-referral program.
 --    avg_rating is a stored rollup of ratings (see README).
 -- ----------------------------------------------------------------
+-- Starts the definition of a table named riders. Everything inside the parentheses defines its columns and rules.
+
 CREATE TABLE riders (
-    rider_id             INTEGER GENERATED ALWAYS AS IDENTITY,
-    name                 VARCHAR(100) NOT NULL,
+    rider_id             INTEGER GENERATED ALWAYS AS IDENTITY,  -- rider_id - The surrogate key. INTEGER is a whole number. GENERATED ALWAYS AS IDENTITY means PostgreSQL assigns the number automatically (1, 2, 3...) 
+    name                 VARCHAR(100) NOT NULL,   -- Text of up to 100 characters. NOT NULL means the value is required.
     email                VARCHAR(254) NOT NULL,   -- RFC 5321 practical maximum
-    accessibility_needs  TEXT,
-    avg_rating           NUMERIC(3,2),            -- NULL until first rating
-    created_at           TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    referred_by          INTEGER,
-    CONSTRAINT pk_riders PRIMARY KEY (rider_id),
-    CONSTRAINT uq_riders_email UNIQUE (email),
+    accessibility_needs  TEXT,  -- TEXT is unlimited-length text, used for free-form descriptions. There's no NOT NULL, so it's optional.
+    avg_rating           NUMERIC(3,2),            -- NULL until first rating - An exact decimal from -9.99 to 9.99.
+    created_at           TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,   -- date and time
+    referred_by          INTEGER,    --ID of the rider who referred this rider
+    CONSTRAINT pk_riders PRIMARY KEY (rider_id),    --Declares rider_id as the primary key
+    CONSTRAINT uq_riders_email UNIQUE (email),      --No two riders can share an email address.
     CONSTRAINT chk_riders_avg_rating CHECK (avg_rating BETWEEN 1 AND 5),
-    CONSTRAINT chk_riders_no_self_referral CHECK (referred_by IS DISTINCT FROM rider_id),
-    CONSTRAINT fk_riders_referrer
+    CONSTRAINT chk_riders_no_self_referral CHECK (referred_by IS DISTINCT FROM rider_id),    -- blockd=s rider from referring themselves
+    CONSTRAINT fk_riders_referrer   --recursive foreign key constraint to enforce that referred_by must reference a valid rider_id in the same table
         FOREIGN KEY (referred_by) REFERENCES riders (rider_id)
         ON DELETE SET NULL
-);
+);   --ends the table  
 
 -- ----------------------------------------------------------------
 -- 2. rider_preferences (Actor, 1:1 side table) — needs riders.
@@ -68,11 +79,11 @@ CREATE TABLE riders (
 --    can compare preference pairs directly.
 -- ----------------------------------------------------------------
 CREATE TABLE rider_preferences (
-    rider_id            INTEGER     NOT NULL,
+    rider_id            INTEGER     NOT NULL,     -- both the primary key and a foreign key
     conversation_pref   VARCHAR(10),
     music_pref          VARCHAR(30),
     temp_pref           VARCHAR(10),
-    pooled_ok           BOOLEAN     NOT NULL DEFAULT FALSE,
+    pooled_ok           BOOLEAN     NOT NULL DEFAULT FALSE,  
     vehicle_class_pref  VARCHAR(10),
     CONSTRAINT pk_rider_preferences PRIMARY KEY (rider_id),
     CONSTRAINT fk_rider_preferences_rider
@@ -100,7 +111,7 @@ CREATE TABLE vehicles (
         CHECK (vehicle_class IN ('ECONOMY', 'COMFORT', 'XL', 'LUXURY')),
     CONSTRAINT chk_vehicles_capacity CHECK (capacity BETWEEN 1 AND 15)
 );
-
+-- checks vehicle capacity 1-15 adn wheel chair accessible is boolean - no foreign keys  
 -- ----------------------------------------------------------------
 -- 4. drivers (Producer) — references nothing.
 --    Matching attributes live directly on the driver row.
@@ -120,10 +131,15 @@ CREATE TABLE drivers (
         CHECK (conversation_pref IN ('QUIET', 'SOME', 'CHATTY')),
     CONSTRAINT chk_drivers_avg_rating CHECK (avg_rating BETWEEN 1 AND 5)
 );
-
+--uq_drivers_license_no UNIQUE (license_no) prevents two drivers from sharing a 
+--   license number, which blocks duplicate or fraudulent accounts.
+--active BOOLEAN NOT NULL DEFAULT TRUE is how drivers are deactivated rather than 
+--   deleted once they have trip history.
 -- ----------------------------------------------------------------
 -- 5. driver_badges (Catalog) — references nothing.
 --    Reference data: defines which badges exist.
+--    This is the catalog: a simple list of which badges exist. 
+--    badge_name is unique so no badge is defined twice, and criteria explains how a driver earns it.
 -- ----------------------------------------------------------------
 CREATE TABLE driver_badges (
     badge_id    INTEGER GENERATED ALWAYS AS IDENTITY,
@@ -134,9 +150,13 @@ CREATE TABLE driver_badges (
 );
 
 -- ----------------------------------------------------------------
--- 6. driver_vehicles (Junction) — needs drivers and vehicles.
+-- 6. driver_vehicles (first junction table) — needs drivers and vehicles.
 --    Resolves M:N: a driver runs many cars, a car has many drivers.
 --    Composite PK is the pair of FKs.
+--    This is a composite primary key: the pair of columns is the key, with no separate ID.
+--    The same driver–vehicle pair can't be entered twice, but one driver can pair with many vehicles 
+--    and one vehicle with many drivers. 
+--    That's how a many-to-many relationship is resolved.  
 -- ----------------------------------------------------------------
 CREATE TABLE driver_vehicles (
     driver_id       INTEGER NOT NULL,
@@ -177,8 +197,8 @@ CREATE TABLE driver_badge_awards (
 -- ----------------------------------------------------------------
 CREATE TABLE trips (
     trip_id           INTEGER GENERATED ALWAYS AS IDENTITY,
-    driver_id         INTEGER,
-    vehicle_id        INTEGER,
+    driver_id         INTEGER,  --nullable, because a trip exists as REQUESTED before any driver is matched
+    vehicle_id        INTEGER,  --nullable, because a trip exists as REQUESTED before any driver is matched
     status            VARCHAR(12)   NOT NULL DEFAULT 'REQUESTED',
     requested_at      TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     completed_at      TIMESTAMP,
@@ -187,10 +207,10 @@ CREATE TABLE trips (
     match_score       NUMERIC(3,2),
     fare_amount       NUMERIC(10,2),
     CONSTRAINT pk_trips PRIMARY KEY (trip_id),
-    CONSTRAINT uq_trips_trip_driver UNIQUE (trip_id, driver_id),  -- target for ratings FK
+    CONSTRAINT uq_trips_trip_driver UNIQUE (trip_id, driver_id),  -- target for ratings FK-New trips start in the REQUESTED state automatically.
     CONSTRAINT fk_trips_driver
         FOREIGN KEY (driver_id) REFERENCES drivers (driver_id)
-        ON DELETE RESTRICT,
+        ON DELETE RESTRICT,    --- trip history must never be delected by accident 
     CONSTRAINT fk_trips_vehicle
         FOREIGN KEY (vehicle_id) REFERENCES vehicles (vehicle_id)
         ON DELETE RESTRICT,
@@ -200,7 +220,7 @@ CREATE TABLE trips (
         ON DELETE RESTRICT,
     CONSTRAINT chk_trips_status
         CHECK (status IN ('REQUESTED', 'MATCHED', 'ACCEPTED',
-                          'IN_PROGRESS', 'COMPLETED', 'CANCELED')),
+                          'IN_PROGRESS', 'COMPLETED', 'CANCELED')),  -enforce trip lifecycle
     CONSTRAINT chk_trips_driver_vehicle_together
         CHECK ((driver_id IS NULL) = (vehicle_id IS NULL)),
     CONSTRAINT chk_trips_assigned_after_request
@@ -215,12 +235,13 @@ CREATE TABLE trips (
 );
 
 -- Business rule: a driver cannot be on two active trips at once.
-CREATE UNIQUE INDEX uq_trips_one_active_per_driver
+CREATE UNIQUE INDEX uq_trips_one_active_per_driver     -- index normally speeds up lookups. A unique index also forbids duplicates
     ON trips (driver_id)
-    WHERE status IN ('MATCHED', 'ACCEPTED', 'IN_PROGRESS');
-
+    WHERE status IN ('MATCHED', 'ACCEPTED', 'IN_PROGRESS');   --WHERE makes it partial: only active trips count.  
 -- ----------------------------------------------------------------
--- 9. trip_riders (Junction) — needs trips and riders.
+-- 9. trip_riders (Junction) — needs trips and riders - makes pooled rides possible
+--  a composite key of (trip_id, rider_id) and a fare_share for each rider, checked to be zero or more.
+-- uses CASCADE from trips (the links go with the trip) and RESTRICT from riders (a rider with trip history can't be deleted).
 --    Makes trips M:N with riders (pooled rides); per-rider fare split.
 -- ----------------------------------------------------------------
 CREATE TABLE trip_riders (
@@ -247,26 +268,26 @@ CREATE TABLE ratings (
     trip_id    INTEGER     NOT NULL,
     rider_id   INTEGER     NOT NULL,
     driver_id  INTEGER     NOT NULL,
-    direction  VARCHAR(16) NOT NULL,
+    direction  VARCHAR(16) NOT NULL,    -- records who rated whom
     score      INTEGER     NOT NULL,
     comment    TEXT,
     CONSTRAINT pk_ratings PRIMARY KEY (rating_id),
-    CONSTRAINT uq_ratings_one_per_direction UNIQUE (trip_id, rider_id, direction),
+    CONSTRAINT uq_ratings_one_per_direction UNIQUE (trip_id, rider_id, direction),   -- allows each rider one rating per direction per trip
     CONSTRAINT fk_ratings_trip_rider
         FOREIGN KEY (trip_id, rider_id) REFERENCES trip_riders (trip_id, rider_id)
-        ON DELETE CASCADE,
+        ON DELETE CASCADE,   -- must exist in trip_riders, so the rider was on this trip
     CONSTRAINT fk_ratings_trip_driver
         FOREIGN KEY (trip_id, driver_id) REFERENCES trips (trip_id, driver_id)
-        ON DELETE CASCADE,
+        ON DELETE CASCADE,   -- must match trips, so the driver drove this trip.
     CONSTRAINT chk_ratings_direction
         CHECK (direction IN ('RIDER_TO_DRIVER', 'DRIVER_TO_RIDER')),
-    CONSTRAINT chk_ratings_score CHECK (score BETWEEN 1 AND 5)
+    CONSTRAINT chk_ratings_score CHECK (score BETWEEN 1 AND 5)   -- created last bedpedns on both trips and trip_riders 
 );
 
 COMMIT;
-
+-- This makes everything since BEGIN permanent. Until this line runs, none of the changes are saved.
 -- Verification: should list exactly 10 tables on every run.
 SELECT table_name
-FROM information_schema.tables
-WHERE table_schema = 'public'
+FROM information_schema.tables    -- built-in catalog of every table in the database
+WHERE table_schema = 'public'      -- lists the tables in the default public schema alphabetically
 ORDER BY table_name;
