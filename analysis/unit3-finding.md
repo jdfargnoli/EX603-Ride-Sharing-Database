@@ -1,0 +1,11 @@
+# Finding: The No-Show Rate on the Trips Dashboard Is Overstated
+
+**To:** The team that owns the trips dashboard
+**From:** Trust and Data team
+**Re:** The no-show rate behind the frozen driver bonus payout
+
+Two weeks ago, the trips dashboard reported that about half of all trips end in a rider no-show. Leadership froze this quarter's driver bonuses because of that figure. We went back to the underlying trip records, and they do not support it. The data holds 200 trips. Only 12 of them are recorded as a rider no-show, which is 6 percent of all trips. Another 22 trips were cancelled for other reasons. The remaining 166 trips have no cancellation reason at all, because they were never cancelled. These are ordinary trips that went ahead as planned, and they make up the large majority of the platform's activity. This is much closer to what the senior driver who questioned the dashboard sees in practice.
+
+The error comes from how the dashboard handles a blank field. When a trip is not cancelled, its cancellation reason is left empty, not filled in with "none." The dashboard's calculation compared every trip's reason against "rider no show." The database cannot compare an empty field with anything, so it does not count those trips on either side of the comparison. It quietly sets them aside. No error appears and nothing warns the person reading the result. As a result, the 166 trips that went normally were dropped from the count, and the no-show rate was measured against only the small group of trips that had already been cancelled. Comparing no-shows to cancelled trips instead of to all trips is what made the problem look many times larger than it is. The calculation ran cleanly and produced a believable-looking number, which is why no one questioned it.
+
+We recommend lifting the freeze on the driver bonuses. The decision rested on a figure that the data does not support, and the actual no-show rate is low. Before the dashboard is used for another decision, its calculation should be corrected to include trips with an empty cancellation reason. We have prepared a corrected version and checked it three different ways, and all three give the same answer. We also suggest that any figure used to approve or stop a payment be checked against the total number of trips before it is acted on, so that a gap like this one is caught early.
