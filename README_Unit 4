@@ -1,0 +1,15 @@
+Task 4.1: Measure the platform
+Calculates the platform's actual performance metrics and examines how they vary across producers. Uses SQL queries 
+that answer questions. 
+- Finds the count, total, average, minimum, and maximum of your theme’s metric across the whole event table
+- Calculates the event count and average metric for each producer. Sorts the results from the producer with 
+the most events to the producer with the fewest.
+- Finds which producers have enough volume for their rate to mean anything
+- Shows how performance varies across regions
+
+Task 4.2: Build the breakdown leadership asked for
+Part A: For each producer, compute the total number of events and the total number of events classified as 
+failures, in a single pass over the event table 
+Part B: Write a query that produces regional subtotals and a platform-wide grand total without including 
+the individual detail rows. 
+Part C: Establish a baseline for evaluating high-volume producers.
