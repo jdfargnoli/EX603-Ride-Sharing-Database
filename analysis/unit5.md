@@ -122,19 +122,19 @@ If the tables were scaled to 1 million trips, I would expect PostgreSQL to chang
 
 ## Reflection
 
-1. A useful Cartesian product on the platform
+###1. A useful Cartesian product on the platform
 
 ROUTAI’s core function is preference-based matching between riders and drivers, and that starts naturally with a Cartesian product. riders CROSS JOIN drivers produces every possible rider–driver pair. Each pair can then be scored on how well the driver’s attributes fit the rider’s preferences (vehicle type, rating, accessibility), and the best match chosen. A second example is drivers × hourly time slots, a grid used to show availability, where gaps reveal under-covered hours.
 
 The catch is size: 50,000 riders × 5,000 drivers would be 250 million pairs. In practice, you’d first filter both sides, for example to riders currently requesting a trip and drivers who are available within the area, so the product stays small.
 
-2. Join algorithms PostgreSQL chose
+###2. Join algorithms PostgreSQL chose
 
 On the small dataset, it chose two Hash Joins: trips ⋈ riders on rider_id, then ⋈ drivers on driver_id. All three tables were read with sequential scans, and a Sort node handled ORDER BY trip_id.
 
 On the scaled dataset, it chose two Nested Loops using Index Scans on riders_pkey and drivers_pkey, with Memoize caching the lookups. It read trips through trips_pkey, so no Sort was needed.
 
-3. Plan information that explains those choices
+###3. Plan information that explains those choices
 
 Row counts: rows=20, rows=10, and rows=5 show tiny tables, small enough that sequential scans and in-memory hashing are the cheapest approach.
 Hash memory: Memory Usage: 9kB and Batches: 1 show that each hash table fit in memory in one pass, which is ideal for a Hash Join.
@@ -143,7 +143,7 @@ Costs: the Sort (cost=4.14..4.19) is the most expensive node. At 1 million rows,
 Memoize statistics: Hits: 950000 Misses: 50000 for riders shows why Nested Loop won at scale. Each rider is looked up by index only once, and the remaining 95% of lookups come from the cache.
 Estimated vs. actual rows match at every node, so the planner was working from accurate statistics.
 
-4. Why understanding join algorithms is useful
+###4. Why understanding join algorithms is useful
 
 The join algorithm largely decides how fast a query runs and how that speed changes as data grows. Knowing which one was used helps you:
 
@@ -152,7 +152,7 @@ decide which indexes to add, since the scaled plan depended entirely on the prim
 spot bad statistics when estimated and actual rows diverge; and
 predict scaling behavior. Execution time went from 0.047 ms to 676 ms as the data grew, and the plan shows where that time went: reading every trip, because the query has no filter.
 
-5. Changes that would favor a different algorithm
+###5. Changes that would favor a different algorithm
 
 Data growth: already observed. Going from 20 to 1,000,000 trips shifted the plan from Hash Join to Nested Loop with Index Scans and Memoize.
 A selective WHERE filter, such as one rider’s trips or one day’s trips. With indexes on trips.rider_id and trips.requested_at, PostgreSQL would favor a Nested Loop with Index Scans, since only a few rows need matching.
