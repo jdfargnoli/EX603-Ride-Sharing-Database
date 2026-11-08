@@ -1,10 +1,10 @@
 # Task 5.4: Write Your Recommendations
 
-My analysis found two groups of drivers who need attention, but they have very different problems. The first group works but keeps running into failed trips. The second group never got started at all. Treating them the same way would be a mistake, so I recommend a separate action for each.
+My analysis found two groups of drivers who need attention, but they have very different problems. The first group works but keeps running into failed trips. The second group never gets started at all. Treating them the same way would be a mistake, so I recommend a separate action for each.
 
 ## Group 1: Drivers who fail often — Driver_02 and Driver_03
 
-**What I found:** Across the platform, about 6% of trips end with the rider not showing up. Driver_02 had 3 rider no-shows in 16 trips (about 19%), and Driver_03 had 2 in 13 trips (about 15%). That's roughly three times the platform average. Driver_04's rate looks similar, but it comes from a single no-show in only 6 trips, which is too few to draw a conclusion.
+**What I found: Across the platform, about 6% of trips end with the rider not showing up. Driver_02 had 3 rider no-shows in 16 trips (about 19%), and Driver_03 had 2 in 13 trips (about 15%). That's roughly three times the platform average. Driver_04's rate looks similar, but it comes from a single no-show in only 6 trips, which is too few to draw a conclusion.
 
 The important detail is *who* failed. In all five of these no-shows, it was the **rider** who didn't appear, and they were five different riders. Two of those riders, Rider_01 and Rider_21, also failed to show up for other drivers. On the evidence I have, these drivers are not unreliable. They are on the receiving end of unreliable riders.
 
