@@ -21,4 +21,4 @@ ORDER BY line;                                                 -- Print the 3 li
 -- Step 4: When is a Cartesian product useful, and when is it an error?
 -- Useful: when you deliberately want every combination, like the 12 team/playoff-status possibilities above, a schedule grid (every team x every week), or test data.
 -- Error: when a join condition is accidentally left out. For example, FROM games, teams with no WHERE games.team_id = teams.team_id pairs every
---   game with every team: far too many rows, inflated totals, and very slow on large tables (10,000 x 1,000 = 10,000,000 rows).
+--   game with every team: far too many rows, inflated totals, and very slow on large tables (10,000 x 1,000 = 10,000,000 rows).   
