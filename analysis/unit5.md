@@ -106,16 +106,3 @@ My dataset has **25 awards spread across 12 drivers**, and individual drivers ho
 Every one of these designs also loses **`awarded_on`**, because none of them has a place for a fact about the driver–badge pair itself. My timing questions would become impossible.
 
 In short, without the junction table my analysis would be either **impossible** (single column), **fragile and hard to maintain** (repeating columns, flags), or **unreliable** (text lists without referential integrity). By normalising through `driver_badge_awards`, I keep the question to a few simple equi-joins, enforced by keys.
-
----
-
-## References
-
-1. PostgreSQL Global Development Group. *PostgreSQL Documentation*, §7.2.1.1 "Joined Tables." https://www.postgresql.org/docs/current/queries-table-expressions.html
-2. PostgreSQL Global Development Group. *PostgreSQL Documentation*, §5.5 "Constraints" (primary keys, unique constraints, foreign keys, `ON DELETE RESTRICT`). https://www.postgresql.org/docs/current/ddl-constraints.html
-3. PostgreSQL Global Development Group. *PostgreSQL Documentation*, `CREATE VIEW`. https://www.postgresql.org/docs/current/sql-createview.html
-4. PostgreSQL Global Development Group. *PostgreSQL Documentation*, §9.21 "Aggregate Functions" (`string_agg`, `COUNT`). https://www.postgresql.org/docs/current/functions-aggregate.html
-5. Elmasri, R. & Navathe, S. B. *Fundamentals of Database Systems*, 7th ed. Pearson, 2016. ER-to-relational mapping of M:N relationships; normalisation and First Normal Form.
-6. Codd, E. F. "A Relational Model of Data for Large Shared Data Banks." *Communications of the ACM*, 13(6), 377–387, 1970.
-7. Kimball, R. & Ross, M. *The Data Warehouse Toolkit*, 3rd ed. Wiley, 2013. Fact tables, dimensions, and bridge tables for many-to-many relationships.
-8. Regulation (EU) 2016/679 (General Data Protection Regulation), Article 5(1)(c), "data minimisation." https://eur-lex.europa.eu/eli/reg/2016/679/oj
