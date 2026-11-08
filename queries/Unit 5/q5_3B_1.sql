@@ -5,4 +5,4 @@ SELECT t.trip_id, r.rider_name AS actor_rider, d.driver_name AS producer_driver,
 FROM trips   AS t
 JOIN riders  AS r ON r.rider_id  = t.rider_id
 JOIN drivers AS d ON d.driver_id = t.driver_id
-ORDER BY trip_id;
+ORDER BY trip_id; 
