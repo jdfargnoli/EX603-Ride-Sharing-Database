@@ -169,3 +169,17 @@ CREATE INDEX idx_trips_rider_id  ON trips (rider_id);
 
 At 200 rows the planner would probably ignore them. Their value would only show up at larger volumes or in filtered queries, so I would treat this as a prediction to verify, not a proven result.
 
+
+---
+
+## Reflection
+
+In Task 5.3, PostgreSQL joined my three tables using two hash joins. That made sense: every table was small enough to fit in memory, and the query needed every trip. Several changes to my data or schema could lead PostgreSQL to choose a different algorithm.
+
+The biggest factor is **table size**. If `trips` grew to millions of rows, scanning and sorting the whole table on every run would become slow. If `riders` grew too large to hash in memory, PostgreSQL might process the join from disk in several rounds or switch to a **merge join** that works through both tables in sorted order.
+
+**Indexes** matter as well. My schema has no indexes on `trips.driver_id` or `trips.rider_id`. If I added them and filtered the query to a single driver, as my Bonus Dispute screen would, PostgreSQL would likely use a **nested loop**. That looks up only the matching rows instead of reading every trip, which would be much faster at large volumes.
+
+This connects to the **number of matching records**. Hash joins work well when most rows take part in the join, and nested loops work well when only a few do.
+
+Finally, I learned that **statistics** matter. Before I ran `ANALYZE`, PostgreSQL guessed there were 100 riders instead of 30 and chose a nested loop. The planner bases its choice on its estimates, not the true row counts, so keeping statistics current is part of keeping queries fast.
