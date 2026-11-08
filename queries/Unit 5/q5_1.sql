@@ -1,4 +1,4 @@
--- 5.1 Who are the people behind each trip event?
+-- 5.1.1 Who are the people behind each trip event?
 -- Who are the people behind each trip event?
 -- This query joins three tables to display the actor who performed each event, the producer associated with the event,
 -- and the event's date and time.
@@ -12,7 +12,7 @@ JOIN riders  AS r ON r.rider_id  = t.rider_id     -- Match each trip to its ride
 JOIN drivers AS d ON d.driver_id = t.driver_id    -- Match each trip to its driver via fk_trips_prod
 ORDER BY trip_id;
 
--- 5.2 Do the producers identified in Assignment 4 share certain catalog credentials or tags?
+-- 5.1.2 Do the producers identified in Assignment 4 share certain catalog credentials or tags?
 -- This query connects the producer table to the catalog table through the junction table.
 -- returning the producers associated with my theme's catalog tag.
 -- Which drivers (producers) hold the theme's badge (catalog tag)?
@@ -29,7 +29,7 @@ JOIN driver_badges       AS b ON b.badge_id  = a.badge_id   -- Junction → cata
 WHERE b.badge_name = 'Five Star'                         -- Keep only the theme's catalog tag
 ORDER BY a.awarded_on, d.driver_id;                      -- Earliest award first; driver_id breaks ties
 
---5.3 How do the producers compare with one another?
+--5.1.3 How do the producers compare with one another?
 -- Write a self join to compare records within the producer table.
 -- Use the results to explore whether the producers identified in Assignment 4 share characteristics with other
 -- producers or whether differences in activity levels may explain their performance.
