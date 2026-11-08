@@ -80,7 +80,7 @@ Whether any of these concerns actually applies to Driver_14 and Driver_15 depend
 ## Task 5.3
 
 ### 1. Capture the full execution plan
-
+```sql
 EXPLAIN
 SELECT t.trip_id, r.rider_name AS actor_rider, d.driver_name AS producer_driver,
        t.requested_at AS event_datetime
