@@ -154,7 +154,7 @@ predict scaling behavior. Execution time went from 0.047 ms to 676 ms as the dat
 
 ### 5. Changes that would favor a different algorithm
 
-Data growth: already observed. Going from 20 to 1,000,000 trips shifted the plan from Hash Join to Nested Loop with Index Scans and Memoize.
+Data growth: already observed. Going from 20 to 1,000,000 trips would shift the plan from Hash Join to Nested Loop with Index Scans and Memoize.
 A selective WHERE filter, such as one rider’s trips or one day’s trips. With indexes on trips.rider_id and trips.requested_at, PostgreSQL would favor a Nested Loop with Index Scans, since only a few rows need matching.
 Indexes on the foreign keys (trips.rider_id, trips.driver_id). PostgreSQL doesn’t create these automatically, and they open up index-based plans for queries that start from a rider or driver.
 Both inputs already sorted on the join key, for example joining large tables through indexes on the join columns. That makes a Merge Join attractive because no hash table or extra sort is needed.
