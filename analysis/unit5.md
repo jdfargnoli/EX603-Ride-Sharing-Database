@@ -106,18 +106,17 @@ The plan uses two Hash Joins: trips ⋈ riders on rider_id, then that result ⋈
 
 ### 3. Explain why PostgreSQL may have selected these algorithms, considering table sizes and available indexes
 
-The tables are very small. Each fits in one disk page, so reading the whole table is cheaper than using the primary-key indexes, which would mean reading the index and then the table.
-Every row must be joined. With no WHERE filter, building a small in-memory hash of riders and of drivers and checking each trip against it once is the cheapest approach. PostgreSQL hashes the smaller table and streams the larger one, trips, through it.
-Merge Join wasn’t chosen because it requires both inputs sorted on the join key, and sorting trips by rider_id and again by driver_id would cost more than hashing.
-Indexes are available but unused. The primary keys are indexed automatically, but at this size the planner estimates them as more expensive. The foreign-key columns trips.rider_id and trips.driver_id have no indexes, because PostgreSQL doesn’t create them automatically.
+- **The tables are small.** With only 20 trips, 10 riders, and 5 drivers, reading each whole table is faster than using an index.
+- **Every row is joined.** There is no `WHERE` filter, so PostgreSQL loads riders and drivers into small in-memory hash tables and checks each trip against them once. This Hash Join is the fastest option here.
+- **Indexes aren't needed yet.** The primary keys have indexes, but at this size using them would cost more than simply scanning the tables.
 
 ### 4. Predict which part of the query might become less efficient as the dataset grows
 
-The Sort for ORDER BY trip_id. It’s already the most expensive node. With millions of rows it can exceed memory (work_mem) and spill to disk.
-The full scan of trips. Without a WHERE clause, every trip is processed every time, so the cost grows in direct proportion to the table’s size.
-The hash tables. If riders or drivers grows too large for memory, the Hash Joins must split their work into batches on disk.
+- **Sorting.** `ORDER BY trip_id` must sort every row. With millions of trips, the sort may no longer fit in memory and slows down.
+- **Reading every trip.** There is no `WHERE` filter, so the query processes all trips every time. More trips means more work.
+- **Hash tables.** If riders or drivers grow very large, their hash tables may not fit in memory.
 
-To test this, I scaled the tables to 1 million trips. PostgreSQL switched to Nested Loops with Index Scans and Memoize. It read trips in trip_id order through trips_pkey, which eliminated the Sort, and cached the rider and driver lookups. Execution time rose from 0.05 ms to about 676 ms. The plan adapts, but the cost of reading every trip remains.
+If the tables were scaled to 1 million trips, I would expect PostgreSQL to change its plan to use indexes instead of sorting, but the run time would still rise.
 
 ---
 
