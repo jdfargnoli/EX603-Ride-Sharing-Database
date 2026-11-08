@@ -169,14 +169,3 @@ CREATE INDEX idx_trips_rider_id  ON trips (rider_id);
 
 At 200 rows the planner would probably ignore them. Their value would only show up at larger volumes or in filtered queries, so I would treat this as a prediction to verify, not a proven result.
 
----
-
-## References
-
-1. PostgreSQL Global Development Group. *PostgreSQL Documentation*, §14.1 "Using EXPLAIN." https://www.postgresql.org/docs/current/using-explain.html
-2. PostgreSQL Global Development Group. *PostgreSQL Documentation*, §51.5 "Planner/Optimizer" (nested loop, merge join, and hash join strategies). https://www.postgresql.org/docs/current/planner-optimizer.html
-3. PostgreSQL Global Development Group. *PostgreSQL Documentation*, `ANALYZE` and §14.2 "Statistics Used by the Planner." https://www.postgresql.org/docs/current/planner-stats.html
-4. PostgreSQL Global Development Group. *PostgreSQL Documentation*, §20.4.1 "Memory" (`work_mem`). https://www.postgresql.org/docs/current/runtime-config-resource.html
-5. PostgreSQL Global Development Group. *PostgreSQL Documentation*, §7.2.1.1 "Joined Tables" and §9.24 "Subquery Expressions." https://www.postgresql.org/docs/current/queries-table-expressions.html
-6. Elmasri, R. & Navathe, S. B. *Fundamentals of Database Systems*, 7th ed. Pearson, 2016. Query processing and join algorithms; ER-to-relational mapping of M:N relationships.
-7. Kimball, R. & Ross, M. *The Data Warehouse Toolkit*, 3rd ed. Wiley, 2013. Fact tables, dimensions, and bridge tables.
