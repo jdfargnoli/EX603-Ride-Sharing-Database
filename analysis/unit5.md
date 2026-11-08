@@ -99,7 +99,7 @@ Sort  (cost=4.14..4.19 rows=20 width=29)
                     ->  Seq Scan on riders r  (cost=0.00..1.10 rows=10 width=12)
         ->  Hash  (cost=1.05..1.05 rows=5 width=13)
               ->  Seq Scan on drivers d  (cost=0.00..1.05 rows=5 width=13)
-
+```
 ### 2. Identify the join algorithm or algorithms used
 
 The plan uses two Hash Joins: trips ⋈ riders on rider_id, then that result ⋈ drivers on driver_id. A Sort node handles ORDER BY, and all three tables are read with sequential scans. No Nested Loop or Merge Join is used at this size.
