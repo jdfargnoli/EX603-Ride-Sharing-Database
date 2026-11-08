@@ -123,12 +123,41 @@ To test this, I scaled the tables to 1 million trips. PostgreSQL switched to Nes
 
 ## Reflection
 
-In Task 5.3, PostgreSQL joined my three tables using two hash joins. That made sense: every table was small enough to fit in memory, and the query needed every trip. Several changes to my data or schema could lead PostgreSQL to choose a different algorithm.
+1. A useful Cartesian product on the platform
 
-The biggest factor is **table size**. If `trips` grew to millions of rows, scanning and sorting the whole table on every run would become slow. If `riders` grew too large to hash in memory, PostgreSQL might process the join from disk in several rounds or switch to a **merge join** that works through both tables in sorted order.
+ROUTAI’s core function is preference-based matching between riders and drivers, and that starts naturally with a Cartesian product. riders CROSS JOIN drivers produces every possible rider–driver pair. Each pair can then be scored on how well the driver’s attributes fit the rider’s preferences (vehicle type, rating, accessibility), and the best match chosen. A second example is drivers × hourly time slots, a grid used to show availability, where gaps reveal under-covered hours.
 
-**Indexes** matter as well. My schema has no indexes on `trips.driver_id` or `trips.rider_id`. If I added them and filtered the query to a single driver, as my Bonus Dispute screen would, PostgreSQL would likely use a **nested loop**. That looks up only the matching rows instead of reading every trip, which would be much faster at large volumes.
+The catch is size: 50,000 riders × 5,000 drivers would be 250 million pairs. In practice, you’d first filter both sides, for example to riders currently requesting a trip and drivers who are available within the area, so the product stays small.
 
-This connects to the **number of matching records**. Hash joins work well when most rows take part in the join, and nested loops work well when only a few do.
+2. Join algorithms PostgreSQL chose
 
-Finally, I learned that **statistics** matter. Before I ran `ANALYZE`, PostgreSQL guessed there were 100 riders instead of 30 and chose a nested loop. The planner bases its choice on its estimates, not the true row counts, so keeping statistics current is part of keeping queries fast.
+On the small dataset, it chose two Hash Joins: trips ⋈ riders on rider_id, then ⋈ drivers on driver_id. All three tables were read with sequential scans, and a Sort node handled ORDER BY trip_id.
+
+On the scaled dataset, it chose two Nested Loops using Index Scans on riders_pkey and drivers_pkey, with Memoize caching the lookups. It read trips through trips_pkey, so no Sort was needed.
+
+3. Plan information that explains those choices
+
+Row counts: rows=20, rows=10, and rows=5 show tiny tables, small enough that sequential scans and in-memory hashing are the cheapest approach.
+Hash memory: Memory Usage: 9kB and Batches: 1 show that each hash table fit in memory in one pass, which is ideal for a Hash Join.
+Join conditions: Hash Cond: (t.rider_id = r.rider_id) shows equality joins, which Hash Joins require.
+Costs: the Sort (cost=4.14..4.19) is the most expensive node. At 1 million rows, the planner avoided it entirely by using Index Scan using trips_pkey, which returns trips already in trip_id order.
+Memoize statistics: Hits: 950000 Misses: 50000 for riders shows why Nested Loop won at scale. Each rider is looked up by index only once, and the remaining 95% of lookups come from the cache.
+Estimated vs. actual rows match at every node, so the planner was working from accurate statistics.
+
+4. Why understanding join algorithms is useful
+
+The join algorithm largely decides how fast a query runs and how that speed changes as data grows. Knowing which one was used helps you:
+
+diagnose slow queries: a Hash Join with Batches above 1 means it spilled to disk, and a Nested Loop over millions of rows with no index is a red flag;
+decide which indexes to add, since the scaled plan depended entirely on the primary-key indexes;
+spot bad statistics when estimated and actual rows diverge; and
+predict scaling behavior. Execution time went from 0.047 ms to 676 ms as the data grew, and the plan shows where that time went: reading every trip, because the query has no filter.
+
+5. Changes that would favor a different algorithm
+
+Data growth: already observed. Going from 20 to 1,000,000 trips shifted the plan from Hash Join to Nested Loop with Index Scans and Memoize.
+A selective WHERE filter, such as one rider’s trips or one day’s trips. With indexes on trips.rider_id and trips.requested_at, PostgreSQL would favor a Nested Loop with Index Scans, since only a few rows need matching.
+Indexes on the foreign keys (trips.rider_id, trips.driver_id). PostgreSQL doesn’t create these automatically, and they open up index-based plans for queries that start from a rider or driver.
+Both inputs already sorted on the join key, for example joining large tables through indexes on the join columns. That makes a Merge Join attractive because no hash table or extra sort is needed.
+Lower work_mem or much larger dimension tables. If hash tables no longer fit in memory, Hash Joins slow down, and Merge Join or index-based plans become more competitive.
+Stale statistics. If the tables change a lot without ANALYZE being run, the estimates become inaccurate and the planner may pick a poor algorithm.
